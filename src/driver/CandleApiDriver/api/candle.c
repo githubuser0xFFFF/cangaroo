@@ -187,7 +187,7 @@ bool __stdcall DLL candle_dev_get_state(candle_handle hdev, candle_devstate_t *s
     }
 }
 
-wchar_t __stdcall DLL *candle_dev_get_path(candle_handle hdev)
+wchar_t* __stdcall DLL candle_dev_get_path(candle_handle hdev)
 {
     if (hdev==NULL) {
         return NULL;
@@ -578,7 +578,7 @@ uint8_t __stdcall DLL candle_frame_dlc(candle_frame_t *frame)
     return frame->can_dlc;
 }
 
-uint8_t __stdcall DLL *candle_frame_data(candle_frame_t *frame)
+uint8_t* __stdcall DLL candle_frame_data(candle_frame_t *frame)
 {
     return frame->data;
 }

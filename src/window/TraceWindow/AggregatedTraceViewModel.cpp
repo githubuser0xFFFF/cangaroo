@@ -1,33 +1,11 @@
-/*
-
-  Copyright (c) 2015, 2016 Hubert Denkmair <hubert@denkmair.de>
-
-  This file is part of cangaroo.
-
-  cangaroo is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 2 of the License, or
-  (at your option) any later version.
-
-  cangaroo is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with cangaroo.  If not, see <http://www.gnu.org/licenses/>.
-
-*/
-
 #include "AggregatedTraceViewModel.h"
 #include <QColor>
-
 #include <core/Backend.h>
 #include <core/CanTrace.h>
 #include <core/CanDbMessage.h>
 
 AggregatedTraceViewModel::AggregatedTraceViewModel(Backend &backend)
-  : BaseTraceViewModel(backend)
+    : BaseTraceViewModel(backend)
 {
     _rootItem = new AggregatedTraceViewItem(0);
     connect(backend.getTrace(), SIGNAL(beforeAppend(int)), this, SLOT(beforeAppend(int)));
@@ -64,7 +42,6 @@ void AggregatedTraceViewModel::updateItem(const CanMessage &msg)
 
 void AggregatedTraceViewModel::onUpdateModel()
 {
-
     if (!_pendingMessageInserts.isEmpty()) {
         beginInsertRows(QModelIndex(), _rootItem->childCount(), _rootItem->childCount()+_pendingMessageInserts.size()-1);
         foreach (CanMessage msg, _pendingMessageInserts) {
@@ -84,7 +61,6 @@ void AggregatedTraceViewModel::onUpdateModel()
     if (_rootItem->childCount()>0) {
         dataChanged(createIndex(0, 0, _rootItem->firstChild()), createIndex(_rootItem->childCount()-1, column_count-1, _rootItem->lastChild()));
     }
-
 }
 
 void AggregatedTraceViewModel::onSetupChanged()
@@ -129,14 +105,15 @@ AggregatedTraceViewModel::unique_key_t AggregatedTraceViewModel::makeUniqueKey(c
     return ((uint64_t)msg.getInterfaceId() << 32) | msg.getRawId();
 }
 
-double AggregatedTraceViewModel::getTimeDiff(const timeval t1, const timeval t2) const
+// ---------------- Qt5 timestamp replacement ----------------
+double AggregatedTraceViewModel::getTimeDiff(const QDateTime &t1, const QDateTime &t2) const
 {
-    double diff = t2.tv_sec - t1.tv_sec;
-    diff += ((double)(t2.tv_usec - t1.tv_usec)) / 1000000;
-    return diff;
+    // Return difference in seconds as double
+    qint64 usec = t1.msecsTo(t2) * 1000; // convert milliseconds to microseconds
+    return usec / 1e6;
 }
 
-
+// ---------------- QModelIndex implementations ----------------
 QModelIndex AggregatedTraceViewModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (!hasIndex(row, column, parent)) {
@@ -184,6 +161,7 @@ int AggregatedTraceViewModel::rowCount(const QModelIndex &parent) const
     return parentItem->childCount();
 }
 
+// ---------------- Data roles ----------------
 QVariant AggregatedTraceViewModel::data_DisplayRole(const QModelIndex &index, int role) const
 {
     AggregatedTraceViewItem *item = (AggregatedTraceViewItem *)index.internalPointer();
@@ -204,17 +182,13 @@ QVariant AggregatedTraceViewModel::data_TextColorRole(const QModelIndex &index, 
 
     if (item->parent() == _rootItem) { // CanMessage row
 
-        struct timeval now;
-        gettimeofday(&now, 0);
+        QDateTime now = QDateTime::currentDateTimeUtc();
+        double colorFactor = getTimeDiff(item->_lastmsg.getDateTime(), now) * 100;
+        if (colorFactor > 200) colorFactor = 200;
+        if (colorFactor < 0) colorFactor = 0;
 
-        int color = getTimeDiff(item->_lastmsg.getTimestamp(), now)*100;
-        if (color>200) { color = 200; }
-        if (color<0) { color = 0; }
-
-        return QVariant::fromValue(QColor(color, color, color));
+        return QVariant::fromValue(QColor(colorFactor, colorFactor, colorFactor));
     } else { // CanSignal Row
         return data_TextColorRole_Signal(index, role, item->parent()->_lastmsg);
     }
 }
-
-

@@ -26,7 +26,6 @@
 #include <core/CanMessage.h>
 
 #include <stdio.h>
-#include <unistd.h>
 #include <time.h>
 #include <fcntl.h>
 #include <QString>

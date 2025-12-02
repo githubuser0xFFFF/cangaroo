@@ -23,6 +23,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QRecursiveMutex>
 #include <QTimer>
 #include <QVector>
 #include <QMap>
@@ -77,7 +78,7 @@ private:
 
     QMap<const CanDbSignal*,uint64_t> _muxCache;
 
-    QMutex _mutex;
+    QRecursiveMutex _mutex;
     QMutex _timerMutex;
     QTimer _flushTimer;
 

@@ -52,7 +52,10 @@ bool DbcParser::parseFile(QFile *file, CanDb &candb)
 DbcToken *DbcParser::createNewToken(QChar ch, int line, int column)
 {
     static const QString acceptableIdStartChars("ABCDEFGHIKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
-    static const QRegExp numberRegExp("^(\\d+(\\.\\d*)?(E[-+]?\\d*)?)$");
+    static const QRegularExpression numberRegExp(
+        R"(^(\d+(\.\d*)?(E[-+]?\d*)?)$)",
+        QRegularExpression::CaseInsensitiveOption   // if needed for 'E'
+        );
 
     if (ch.isSpace()) {
         return new DbcWhitespaceToken(line, column);
@@ -85,9 +88,10 @@ DbcToken *DbcParser::createNewToken(QChar ch, int line, int column)
     } else if (acceptableIdStartChars.contains(ch)) {
         return new DbcIdentifierToken(line, column);
     } else {
-        return 0;
+        return nullptr;
     }
 }
+
 
 DbcParser::error_t DbcParser::tokenize(QFile *file, DbcParser::DbcTokenList &tokens)
 {
@@ -104,7 +108,7 @@ DbcParser::error_t DbcParser::tokenize(QFile *file, DbcParser::DbcTokenList &tok
     error_t retval = err_ok;
 
     QTextStream in(file);
-    in.setCodec("ISO 8859-1");
+    in.setEncoding(QStringConverter::Encoding::Latin1);
 
     while (true) {
         QString s = in.read(1);

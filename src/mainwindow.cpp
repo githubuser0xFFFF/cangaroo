@@ -33,7 +33,6 @@
 #include <window/TraceWindow/TraceWindow.h>
 #include <window/SetupDialog/SetupDialog.h>
 #include <window/LogWindow/LogWindow.h>
-#include <window/GraphWindow/GraphWindow.h>
 #include <window/CanStatusWindow/CanStatusWindow.h>
 #include <window/RawTxWindow/RawTxWindow.h>
 
@@ -119,7 +118,7 @@ QMainWindow *MainWindow::createTab(QString title)
 {
     QMainWindow *mm = new QMainWindow(this);
     QPalette pal(palette());
-    pal.setColor(QPalette::Background, QColor(0xeb, 0xeb, 0xeb));
+    pal.setColor(QPalette::Window, QColor(0xeb, 0xeb, 0xeb));
     mm->setAutoFillBackground(true);
     mm->setPalette(pal);
     ui->mainTabs->addTab(mm, title);
@@ -152,8 +151,6 @@ bool MainWindow::loadWorkspaceTab(QDomElement el)
     QString type = el.attribute("type");    
     if (type=="TraceWindow") {
         mw = createTraceWindow(el.attribute("title"));
-    } else if (type=="GraphWindow") {
-        mw = createGraphWindow(el.attribute("title"));
     } else {
         return false;
     }
@@ -356,27 +353,6 @@ QMainWindow *MainWindow::createTraceWindow(QString title)
     return mm;
 }
 
-QMainWindow *MainWindow::createGraphWindow(QString title)
-{
-    if (title.isNull()) {
-        title = "Graph";
-    }
-    QMainWindow *mm = createTab(title);
-    mm->setCentralWidget(new GraphWindow(mm, backend()));
-    addLogWidget(mm);
-
-    return mm;
-}
-
-void MainWindow::addGraphWidget(QMainWindow *parent)
-{
-    if (!parent) {
-        parent = currentTab();
-    }
-    QDockWidget *dock = new QDockWidget("Graph", parent);
-    dock->setWidget(new GraphWindow(dock, backend()));
-    parent->addDockWidget(Qt::BottomDockWidgetArea, dock);
-}
 
 void MainWindow::addRawTxWidget(QMainWindow *parent)
 {
@@ -463,7 +439,6 @@ void MainWindow::saveTraceToFile()
 
     QFileDialog fileDialog(0, "Save Trace to file", QDir::currentPath(), filters);
     fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setConfirmOverwrite(true);
     fileDialog.selectNameFilter(defaultFilter);
     fileDialog.setDefaultSuffix("asc");
     if (fileDialog.exec()) {

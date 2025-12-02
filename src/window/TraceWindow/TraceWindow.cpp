@@ -176,7 +176,7 @@ bool TraceWindow::loadXML(Backend &backend, QDomElement &el)
 
     QDomElement elAggregated = el.firstChildElement("AggregatedTraceView");
     int sortColumn = elAggregated.attribute("SortColumn", "-1").toInt();
-    ui->tree->sortByColumn(sortColumn);
+    ui->tree->sortByColumn(sortColumn, Qt::AscendingOrder);
 
     return true;
 }

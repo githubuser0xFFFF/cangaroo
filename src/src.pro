@@ -1,15 +1,12 @@
 lessThan(QT_MAJOR_VERSION, 5): error("requires Qt 5")
 
-QT += core gui
-QT += widgets
-QT += xml
-QT += charts
-QT += serialport
+QT += core gui widgets xml serialport
 
 TARGET = cangaroo
 TEMPLATE = app
 CONFIG += warn_on
 CONFIG += link_pkgconfig
+CONFIG += c++17
 
 DESTDIR = ../bin
 MOC_DIR = ../build/moc
@@ -35,7 +32,6 @@ include($$PWD/parser/dbc/dbc.pri)
 include($$PWD/window/TraceWindow/TraceWindow.pri)
 include($$PWD/window/SetupDialog/SetupDialog.pri)
 include($$PWD/window/LogWindow/LogWindow.pri)
-include($$PWD/window/GraphWindow/GraphWindow.pri)
 include($$PWD/window/CanStatusWindow/CanStatusWindow.pri)
 include($$PWD/window/RawTxWindow/RawTxWindow.pri)
 

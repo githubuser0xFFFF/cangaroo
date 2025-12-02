@@ -55,8 +55,6 @@ protected:
 
 public slots:
     QMainWindow *createTraceWindow(QString title=QString());
-    QMainWindow *createGraphWindow(QString title=QString());
-    void addGraphWidget(QMainWindow *parent=0);
     void addRawTxWidget(QMainWindow *parent=0);
     void addLogWidget(QMainWindow *parent=0);
     void addStatusWidget(QMainWindow *parent=0);

@@ -1,4 +1,3 @@
-QT += charts
 QT += network
 SUBDIRS += src
 TEMPLATE = subdirs

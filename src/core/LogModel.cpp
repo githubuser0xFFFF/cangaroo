@@ -97,11 +97,11 @@ QVariant LogModel::data(const QModelIndex &index, int role) const
     if (role == Qt::TextAlignmentRole) {
         switch (index.column()) {
             case column_time:
-                return Qt::AlignRight + Qt::AlignVCenter;
+                return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
             case column_level:
-                return Qt::AlignCenter + Qt::AlignVCenter;
+                return QVariant::fromValue(Qt::AlignCenter | Qt::AlignVCenter);
             case column_text:
-                return Qt::AlignLeft + Qt::AlignVCenter;
+                return QVariant::fromValue(Qt::AlignLeft | Qt::AlignVCenter);
             default:
                 return QVariant();
         }

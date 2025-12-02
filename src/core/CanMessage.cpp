@@ -224,7 +224,7 @@ double CanMessage::getFloatTimestamp() const
 QDateTime CanMessage::getDateTime() const
 {
     qint64 ms = static_cast<qint64>(_timestamp_usec / 1000);
-    int us_rem = static_cast<int>(_timestamp_usec % 1000);
+    //int us_rem = static_cast<int>(_timestamp_usec % 1000);
 
     // Qt does not support microseconds in QDateTime directly,
     // but this keeps millisecond precision intact.

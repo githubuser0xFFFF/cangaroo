@@ -1,5 +1,3 @@
-QMAKE_CFLAGS += -std=gnu11
-
 SOURCES += \
     $$PWD/CandleApiDriver.cpp \
     $$PWD/CandleApiInterface.cpp \

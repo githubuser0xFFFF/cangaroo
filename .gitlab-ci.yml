@@ -62,12 +62,17 @@ build:
 # --------------------------------------------------------
 release_job:
   stage: deploy
-  image: gitlab/glab:latest
+  image: registry.gitlab.com/gitlab-org/cli:latest
   rules:
     - if: $CI_COMMIT_TAG
   dependencies:
-    - build    
+    - build
   script:
-    - glab auth login --job-token $CI_JOB_TOKEN
-    - glab release create $CI_COMMIT_TAG
-    - glab release upload $CI_COMMIT_TAG cangaroo_alt.zip
+    # glab auto-authenticates using CI_JOB_TOKEN with this image (no login needed)
+    - echo "Creating release for $CI_COMMIT_TAG"
+
+    # Safe create (won't fail if release already exists)
+    - glab release create "$CI_COMMIT_TAG" || true
+
+    # Upload the artifact
+    - glab release upload "$CI_COMMIT_TAG" cangaroo_alt.zip

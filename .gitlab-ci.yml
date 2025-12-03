@@ -57,3 +57,24 @@ build:
         - cangaroo_alt.zip
       when: always
 
+# --------------------------------------------------------
+# Release Job
+# --------------------------------------------------------
+release:
+  stage: deploy
+  rules:
+    # Run only when a GitLab Release is created
+    - if: $CI_COMMIT_TAG && $CI_RELEASE_DESCRIPTION
+  dependencies:
+    - build
+  script:
+    - echo "Creating GitLab release with asset"
+
+  release:
+    name: "Release $CI_COMMIT_TAG"
+    tag_name: "$CI_COMMIT_TAG"
+    description: "$CI_RELEASE_DESCRIPTION"
+    assets:
+      links:
+        - name: "cangaroo_alt.zip"
+          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/raw/cangaroo_alt.zip"

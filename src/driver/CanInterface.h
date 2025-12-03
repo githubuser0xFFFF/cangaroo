@@ -31,6 +31,7 @@ class CanMessage;
 class MeasurementInterface;
 
 class CanInterface: public QObject  {
+    Q_OBJECT
 public:
     enum {
         state_ok,

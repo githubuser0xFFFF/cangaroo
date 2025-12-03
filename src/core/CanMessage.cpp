@@ -41,6 +41,7 @@ void CanMessage::cloneFrom(const CanMessage &msg)
 
     _interface = msg._interface;
     _timestamp_usec = msg._timestamp_usec;
+    _isTx = msg._isTx;
 }
 
 /* --- ID functions (unchanged) -------------------------------------------- */
@@ -216,6 +217,12 @@ void CanMessage::setTimestamp(quint64 seconds, uint32_t micro_seconds)
     _timestamp_usec = seconds * 1000000ULL + micro_seconds;
 }
 
+void CanMessage::setCurrentTimestamp()
+{
+    auto usec = QDateTime::currentMSecsSinceEpoch() * 1000;
+    setTimestamp(usec / 1000000, usec % 1000000);
+}
+
 double CanMessage::getFloatTimestamp() const
 {
     return static_cast<double>(_timestamp_usec) / 1e6;
@@ -256,4 +263,15 @@ QString CanMessage::getDataHexString() const
         outstr += QString().asprintf("%02X ", getByte(i));
     }
     return outstr;
+}
+
+
+bool CanMessage::isTx() const
+{
+    return _isTx;
+}
+
+void CanMessage::setTx(bool Tx)
+{
+    _isTx = Tx;
 }

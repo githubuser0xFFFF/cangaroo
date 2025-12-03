@@ -1,6 +1,6 @@
 lessThan(QT_MAJOR_VERSION, 5): error("requires Qt 5")
 
-QT += core gui widgets xml serialport
+QT += core gui widgets xml serialport network
 
 TARGET = cangaroo
 TEMPLATE = app
@@ -44,3 +44,4 @@ unix:include($$PWD/driver/SocketCanDriver/SocketCanDriver.pri)
 #include($$PWD/driver/SLCANDriver/SLCANDriver.pri)
 
 win32:include($$PWD/driver/CandleApiDriver/CandleApiDriver.pri)
+win32:include($$PWD/driver/AsclCANWinServiceDriver/AsclCANWinServiceDriver.pri)

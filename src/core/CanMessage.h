@@ -13,6 +13,9 @@ public:
     CanMessage(const CanMessage &msg);
     void cloneFrom(const CanMessage &msg);
 
+    bool isTx() const;
+    void setTx(bool Tx);
+
     uint32_t getRawId() const;
     void setRawId(const uint32_t raw_id);
 
@@ -59,6 +62,7 @@ public:
     quint64 getTimestampUsec() const;
     void setTimestampUsec(quint64 usec);
     void setTimestamp(quint64 seconds, uint32_t micro_seconds);
+    void setCurrentTimestamp();
 
     double getFloatTimestamp() const;     // seconds.microseconds format
     QDateTime getDateTime() const;
@@ -71,6 +75,7 @@ private:
     uint8_t _dlc;
     bool _isFD;
     bool _isBRS;
+    bool _isTx= false;
     CanInterfaceId _interface;
     union {
         uint8_t  _u8[8*8];

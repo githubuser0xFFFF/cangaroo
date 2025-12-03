@@ -184,7 +184,7 @@ bool AsclCANWinServiceInterface::readMessage(QList<CanMessage> &msglist, unsigne
         memcpy(&msg, frame.data(), sizeof(CANServiceCommon::CANMessage));
 
         CanMessage rx_msg(msg.id);
-        rx_msg.setLength(msg.id);
+        rx_msg.setLength(msg.size);
         rx_msg.setCurrentTimestamp();
         rx_msg.setInterfaceId(getId());
         for (int i = 0; i < msg.size; ++i)

@@ -70,6 +70,7 @@ release_job:
   script:
     # glab auto-authenticates using CI_JOB_TOKEN with this image (no login needed)
     - echo "Creating release for $CI_COMMIT_TAG"
+    - git fetch --tags
 
     # Safe create (won't fail if release already exists)
     - glab release create "$CI_COMMIT_TAG" || true

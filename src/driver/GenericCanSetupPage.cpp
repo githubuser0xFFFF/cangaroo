@@ -15,16 +15,16 @@ GenericCanSetupPage::GenericCanSetupPage(QWidget *parent) :
     _enable_ui_updates(false)
 {
     ui->setupUi(this);
-    connect(ui->cbBitrate, SIGNAL(currentIndexChanged(int)), this, SLOT(updateUI()));
-    connect(ui->cbSamplePoint, SIGNAL(currentIndexChanged(int)), this, SLOT(updateUI()));
-    connect(ui->cbBitrateFD, SIGNAL(currentIndexChanged(int)), this, SLOT(updateUI()));
-    connect(ui->cbSamplePointFD, SIGNAL(currentIndexChanged(int)), this, SLOT(updateUI()));
+    connect(ui->cbBitrate, &QComboBox::currentIndexChanged, this, &GenericCanSetupPage::updateUI);
+    connect(ui->cbSamplePoint, &QComboBox::currentIndexChanged, this, &GenericCanSetupPage::updateUI);
+    connect(ui->cbBitrateFD, &QComboBox::currentIndexChanged, this, &GenericCanSetupPage::updateUI);
+    connect(ui->cbSamplePointFD, &QComboBox::currentIndexChanged, this, &GenericCanSetupPage::updateUI);
 
-    connect(ui->cbConfigOS, SIGNAL(stateChanged(int)), this, SLOT(updateUI()));
-    connect(ui->cbListenOnly, SIGNAL(stateChanged(int)), this, SLOT(updateUI()));
-    connect(ui->cbOneShot, SIGNAL(stateChanged(int)), this, SLOT(updateUI()));
-    connect(ui->cbTripleSampling, SIGNAL(stateChanged(int)), this, SLOT(updateUI()));
-    connect(ui->cbAutoRestart, SIGNAL(stateChanged(int)), this, SLOT(updateUI()));
+    connect(ui->cbConfigOS, &QCheckBox::checkStateChanged, this, &GenericCanSetupPage::updateUI);
+    connect(ui->cbListenOnly, &QCheckBox::checkStateChanged, this, &GenericCanSetupPage::updateUI);
+    connect(ui->cbOneShot, &QCheckBox::checkStateChanged, this, &GenericCanSetupPage::updateUI);
+    connect(ui->cbTripleSampling, &QCheckBox::checkStateChanged, this, &GenericCanSetupPage::updateUI);
+    connect(ui->cbAutoRestart, &QCheckBox::checkStateChanged, this, &GenericCanSetupPage::updateUI);
 }
 
 GenericCanSetupPage::~GenericCanSetupPage()

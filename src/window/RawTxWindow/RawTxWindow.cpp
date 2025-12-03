@@ -34,28 +34,21 @@ RawTxWindow::RawTxWindow(QWidget *parent, Backend &backend) :
 {
     ui->setupUi(this);
 
-    connect(ui->singleSendButton, SIGNAL(released()), this, SLOT(sendRawMessage()));
-    connect(ui->repeatSendButton, SIGNAL(toggled(bool)), this, SLOT(sendRepeatMessage(bool)));
-
-    connect(ui->spinBox_RepeatRate, SIGNAL(valueChanged(int)), this, SLOT(changeRepeatRate(int)));
-
-    connect(ui->comboBoxInterface, SIGNAL(currentIndexChanged(int)), this, SLOT(updateCapabilities()));
-    connect(ui->checkbox_FD, SIGNAL(stateChanged(int)), this, SLOT(updateCapabilities()));
-
-    connect(&backend, SIGNAL(beginMeasurement()),  this, SLOT(refreshInterfaces()));
+    connect(ui->singleSendButton, &QPushButton::released, this, &RawTxWindow::sendRawMessage);
+    connect(ui->repeatSendButton, &QPushButton::toggled, this, &RawTxWindow::sendRepeatMessage);
+    connect(ui->spinBox_RepeatRate, &QSpinBox::valueChanged, this, &RawTxWindow::changeRepeatRate);
+    connect(ui->comboBoxInterface, &QComboBox::currentIndexChanged, this, &RawTxWindow::updateCapabilities);
+    connect(ui->checkbox_FD, &QCheckBox::checkStateChanged, this, &RawTxWindow::updateCapabilities);
+    connect(&backend, &Backend::beginMeasurement, this, &RawTxWindow::refreshInterfaces);
 
     // Timer for repeating messages
     repeatmsg_timer = new QTimer(this);
-    connect(repeatmsg_timer, SIGNAL(timeout()), this, SLOT(sendRawMessage()));
-
-
-    // TODO: Grey out checkboxes that are invalid depending on DLC spinbox state
-    //connect(ui->fieldDLC, SIGNAL(valueChanged(int)), this, SLOT(changeDLC(int)));
-    connect(ui->comboBoxDLC, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDLC()));
+    connect(repeatmsg_timer, &QTimer::timeout, this, &RawTxWindow::sendRawMessage);
+    //connect(ui->fieldDLC, &QSpinBox::valueChanged, this, &RawTxWindow::changeDLC);   // if re-enabled later
+    connect(ui->comboBoxDLC, &QComboBox::currentIndexChanged, this, &RawTxWindow::changeDLC);
 
     // Disable TX until interfaces are present
     this->setDisabled(1);
-
 }
 
 
@@ -67,7 +60,6 @@ RawTxWindow::~RawTxWindow()
 
 void RawTxWindow::changeDLC()
 {
-
     ui->fieldByte0_0->setEnabled(true);
     ui->fieldByte1_0->setEnabled(true);
     ui->fieldByte2_0->setEnabled(true);

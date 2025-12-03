@@ -89,7 +89,5 @@ release:
     - cp cangaroo_alt.zip release_files/
 
     # Step 4: Create the release with attached artifact
-    - glab release create "$CI_COMMIT_TAG" \
-        --notes "$RELEASE_DESC" \
-        --attach "release_files/cangaroo_alt.zip"
+    - glab release create "$CI_COMMIT_TAG" --notes "$RELEASE_DESC" --attach "release_files/cangaroo_alt.zip"
 

@@ -61,7 +61,7 @@ build:
 # Release Job
 # --------------------------------------------------------
 release_job:
-  stage: release
+  stage: deploy
   image: gitlab/glab:latest
   rules:
     - if: $CI_COMMIT_TAG

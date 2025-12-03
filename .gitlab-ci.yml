@@ -64,33 +64,30 @@ release:
   stage: deploy
   image: registry.gitlab.com/gitlab-org/cli:latest
   rules:
-    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_TAG       # Run only when a tag is pushed
   dependencies:
-    - build
+    - build                     # Download artifacts from build job
   script:
-    - echo "Generating changelog for $CI_COMMIT_TAG"
+    - echo "Creating release for $CI_COMMIT_TAG"
 
-    # find previous tag (if any)
+    # Generate changelog between previous tag and current tag
     - PREV_TAG=$(git describe --tags --abbrev=0 "$CI_COMMIT_TAG"^ 2>/dev/null || echo "")
-
-    # generate bullet-list changelog between prev tag and current tag
     - |
       if [ -z "$PREV_TAG" ]; then
-        RELEASE_DESC=$(git log --pretty=format:"- %s")
+        RELEASE_NOTES=$(git log --pretty=format:"- %s")
       else
-        RELEASE_DESC=$(git log "$PREV_TAG".."$CI_COMMIT_TAG" --pretty=format:"- %s")
+        RELEASE_NOTES=$(git log "$PREV_TAG".."$CI_COMMIT_TAG" --pretty=format:"- %s")
       fi
 
-    - echo "Release description:"
-    - echo "$RELEASE_DESC"
+    # Ensure the artifact exists
+    - |
+      if [ ! -f "cangaroo_alt.zip" ]; then
+        echo "ERROR: Artifact cangaroo_alt.zip not found"
+        exit 1
+      fi
 
-    # make a folder and move the artifact into it (artifact from build job appears at repo root)
-    - mkdir -p release_files
-    - if [ -f "cangaroo_alt.zip" ]; then mv cangaroo_alt.zip release_files/; else echo "ERROR: cangaroo_alt.zip not found"; exit 1; fi
+    # Create release (ignore error if it already exists)
+    - glab release create "$CI_COMMIT_TAG" --notes "$RELEASE_NOTES" || true
 
-    # create or update the release using glab
-    - glab release create "$CI_COMMIT_TAG" --notes "$RELEASE_DESC" || true
-
-    # upload the file to the existing release
-    # (glab release upload <tag> <file>... uploads the file contents as a release asset)
-    - glab release upload "$CI_COMMIT_TAG" "release_files/cangaroo_alt.zip"
+    # Upload artifact to the release
+    - glab release upload "$CI_COMMIT_TAG" "cangaroo_alt.zip"

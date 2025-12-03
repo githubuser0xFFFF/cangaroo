@@ -27,61 +27,15 @@ An open source can bus analyzer with support for transmit/receive of standard an
 * if you want to deploy the cangaroo app, make sure to also include the needed Qt Libraries.
   for a normal release build, these are: Qt5Core.dll Qt5Gui.dll Qt5Widgets.dll Qt5Xml.dll
 
-## Changelog
+## Building with CMake
 
-### v0.3.0 
+```bash
+mkdir build && cd build
+cmake ..
+cmake --build .
+```
 
-* Support for MSVC2022 build environment
-* Code cleanup and modernizations
-
-### v0.2.4 unreleased
- 
-* Add initial support for CANFD
-* Add support for SLCAN interfaces on Windows and Linux (CANable, CANable 2.0) including FD support
-* Add support for [CANblaster](https://github.com/normaldotcom/canblaster) socketCAN over UDP server with auto-discovery
-* Add live filtering of CAN messages in trace view
-
-### v0.2.1
-
-* make logging easier
-* refactorings
-* scroll trace view per pixel, not per item (always show last message when autoscroll is on)
-
-### v0.2.0 released 2016-01-24
-
-* docking windows system instead of MDI interface
-* windows build
-* windows PCAN-basic driver
-* handle muxed signals in backend and trace window
-* do not try to extract signals from messages when DLC too short
-* can status window
-* bugfixes in setup dialog
-* show timestamps, log level etc. in log window
-
-### v0.1.3 released 2016-01-16
-
-* new can interface configuration GUI (missing a suid binary to actually set the config)
-* use libnl-route-3 for socketcan device config read
-* query socketcan interfaces for supported config options
-* new logging subsystem, do not use QDebug any more
-* some performance improvements when receiving lots of messages 
-* bugfix with time-delta view: timestamps not shown when no previous message avail
-
-### v0.1.2 released 2016-01-12
-
-* fix device re-scan ("could not bind" console message)
-* fix some dbc parsing issues (signed signals, ...)
-* implement big endian signals
-
-### v0.1.1 released 2016-01-11
-
-* change source structure to better fit debian packaging
-* add debian packaging info
-
-### v0.1 released 2016-01-10
-
-initial release \o/
-
+For detailed changes and version history, see [CHANGELOG.md](CHANGELOG.md).
 
 ## TODO
 

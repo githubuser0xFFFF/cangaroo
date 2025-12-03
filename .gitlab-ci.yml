@@ -1,0 +1,57 @@
+# --------------------------------------------------------
+# Base Windows Job Template
+# Contains shared configuration for Windows-based jobs
+# --------------------------------------------------------
+.windows_job:
+  tags:
+    # Runner tags; uncomment and adjust as needed
+    #- saas-windows-medium-amd64
+    - win10-musterbau
+
+  before_script:
+    # Capture current time
+    - Set-Variable -Name "time" -Value (date -Format "%H:%m")
+    - echo ${time}
+
+    # Print user who triggered the pipeline - just for testing and debugging
+    - echo "started by ${GITLAB_USER_NAME} / @${GITLAB_USER_LOGIN}"
+    - echo "started for project dir ${CI_PROJECT_DIR}"
+
+    # Print the computer name of the runner - just for testing and debugging
+    - 'Write-Output "Running on computer: $env:COMPUTERNAME"'
+
+
+# --------------------------------------------------------
+# Build Job
+# --------------------------------------------------------
+build:
+  extends:
+    - .windows_job   # Inherit configuration from base Windows job
+  stage: build       # Pipeline stage
+  rules:
+    - if: $CI_COMMIT_TAG          # Run when a tag is created
+    - if: $CI_PIPELINE_SOURCE == "push"   # Also run on normal branch pushes
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive  # Ensure submodules are updated
+  script:
+    # Set up Qt6 MSVC22 environment - on the build machine there should be a script to do this
+    - '& "C:\bat\qt6_msvc22_env.ps1"'
+    
+    # Configure CMake build - cmake should be in the PATH of the build machine
+    - cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+    
+    # Build the project
+    - cmake --build build
+
+    # Copy outputs to root so the ZIP is clean
+  #   - copy build\flashjob_lib.dll .
+  #   - copy build\flashjob_test.exe .
+
+  # artifacts:
+  #     name: "flashjob_${CI_COMMIT_TAG:-$CI_COMMIT_SHA}"
+  #     expire_in: 7 days
+  #     paths:
+  #       - flashjob_lib.dll
+  #       - flashjob_test.exe
+  #     when: always
+

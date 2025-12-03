@@ -64,16 +64,16 @@ release:
   stage: deploy
   image: registry.gitlab.com/gitlab-org/cli:latest
   rules:
-    - if: $CI_COMMIT_TAG    # Run only on tag pipelines
+    - if: $CI_COMMIT_TAG
   dependencies:
-    - build                # Get artifacts from build job
+    - build
   script:
-    - echo "Generating changelog for $CI_COMMIT_TAG..."
+    - echo "Generating changelog for $CI_COMMIT_TAG"
 
-    # Step 1: Determine previous tag
+    # find previous tag (if any)
     - PREV_TAG=$(git describe --tags --abbrev=0 "$CI_COMMIT_TAG"^ 2>/dev/null || echo "")
 
-    # Step 2: Generate changelog-style release description
+    # generate bullet-list changelog between prev tag and current tag
     - |
       if [ -z "$PREV_TAG" ]; then
         RELEASE_DESC=$(git log --pretty=format:"- %s")
@@ -84,10 +84,13 @@ release:
     - echo "Release description:"
     - echo "$RELEASE_DESC"
 
-    # Step 3: Copy artifact locally
-    - mkdir release_files
-    - cp cangaroo_alt.zip release_files/
+    # make a folder and move the artifact into it (artifact from build job appears at repo root)
+    - mkdir -p release_files
+    - if [ -f "cangaroo_alt.zip" ]; then mv cangaroo_alt.zip release_files/; else echo "ERROR: cangaroo_alt.zip not found"; exit 1; fi
 
-    # Step 4: Create the release with attached artifact
-    - glab release create "$CI_COMMIT_TAG" --notes "$RELEASE_DESC" --attach "release_files/cangaroo_alt.zip"
+    # create or update the release using glab
+    - glab release create "$CI_COMMIT_TAG" --notes "$RELEASE_DESC" || true
 
+    # upload the file to the existing release
+    # (glab release upload <tag> <file>... uploads the file contents as a release asset)
+    - glab release upload "$CI_COMMIT_TAG" "release_files/cangaroo_alt.zip"

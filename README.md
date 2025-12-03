@@ -2,38 +2,48 @@
 
 An open source can bus analyzer with support for transmit/receive of standard and FD frames and DBC decoding of incoming frames
 
-**Supported interfaces:**
+## Supported interfaces
 
-* [CANable](http://canable.io) SLCAN interfaces on Windows and Linux
-* [CANable 2](http://canable.io) SLCAN interfaces on Windows and Linux with FD support
 * Candlelight interfaces on Windows
+* Asclepion CAN Windows Service interfaces on Windows
 * Socketcan interfaces on Linux
-* [CANblaster](https://github.com/normaldotcom/canblaster) socketCAN over UDP server with auto-discovery
 
 ![demo1](https://user-images.githubusercontent.com/2422337/179544017-0deb66ab-e81d-4e6c-9d99-4059a14921c0.gif)
 
+## Building
 
-## Building on Windows
+### Prerequisites
 
-* Qt Creator (Community Version is okay) brings everything you need
-* except for the PCAN libraries. 
-  * Get them from http://www.peak-system.com/fileadmin/media/files/pcan-basic.zip
-  * Extract to .zip to src/driver/PeakCanDriver/pcan-basic-api
-  * Make sure PCANBasic.dll (the one from pcan-basic-api/Win32 on a "normal" 32bit Windows build)
-    is found when running cangaroo, e.g. by putting it in the same folder as the .exe file.
-* if you don't want Peak support, you can just disable the driver:
-  remove the line "win32:include($$PWD/driver/PeakCanDriver/PeakCanDriver.pri)"
-  from src/src.pro
-* if you want to deploy the cangaroo app, make sure to also include the needed Qt Libraries.
-  for a normal release build, these are: Qt5Core.dll Qt5Gui.dll Qt5Widgets.dll Qt5Xml.dll
+* Qt6 (Core, Widgets, Gui, Xml, SerialPort, Network)
+* CMake 3.16 or newer
+* C++17 compatible compiler
 
-## Building with CMake
+#### Platform-specific dependencies
+
+**Linux/Unix:**
+```bash
+# Ubuntu/Debian
+sudo apt-get install libnl-3-dev libnl-route-3-dev
+
+# RHEL/CentOS/Fedora
+sudo yum install libnl3-devel
+```
+
+**Windows:**
+- Visual Studio 2019 or newer
+- Windows SDK (for SetupApi, Ole32, winusb)
+
+### Building with CMake
 
 ```bash
 mkdir build && cd build
 cmake ..
 cmake --build .
 ```
+
+### Running
+
+The executable will be built in `build/bin/cangaroo` (or `build/bin/cangaroo.exe` on Windows).
 
 For detailed changes and version history, see [CHANGELOG.md](CHANGELOG.md).
 

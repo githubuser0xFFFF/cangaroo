@@ -43,15 +43,17 @@ build:
     # Build the project
     - cmake --build build
 
-    # Copy outputs to root so the ZIP is clean
-  #   - copy build\flashjob_lib.dll .
-  #   - copy build\flashjob_test.exe .
+    # Deploy Qt runtime dependencies for cangaroo.exe
+    # to have a runnable test application in Runtime folder
+    - windeployqt build\bin\cangaroo.exe
 
-  # artifacts:
-  #     name: "flashjob_${CI_COMMIT_TAG:-$CI_COMMIT_SHA}"
-  #     expire_in: 7 days
-  #     paths:
-  #       - flashjob_lib.dll
-  #       - flashjob_test.exe
-  #     when: always
+    # Zip the Runtime folder
+    - powershell -Command "Compress-Archive -Path 'build\bin\*' -DestinationPath 'cangaroo_alt.zip' -Force"
+
+  artifacts:
+      name: "cangaroo_${CI_COMMIT_TAG:-$CI_COMMIT_SHA}"
+      expire_in: 7 days
+      paths:
+        - cangaroo_alt.zip
+      when: always
 

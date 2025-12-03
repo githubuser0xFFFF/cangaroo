@@ -25,6 +25,7 @@
 #include <QDomDocument>
 #include <QTimer>
 #include <core/Backend.h>
+#include <core/CanTrace.h>
 #include <driver/CanInterface.h>
 
 RawTxWindow::RawTxWindow(QWidget *parent, Backend &backend) :
@@ -532,6 +533,10 @@ void RawTxWindow::sendRawMessage()
 
     CanInterface *intf = _backend.getInterfaceById((CanInterfaceId)ui->comboBoxInterface->currentData().toUInt());
     intf->sendMessage(msg);
+    msg.setCurrentTimestamp();
+    msg.setTx(true);
+    msg.setInterfaceId(intf->getId());
+    _backend.getTrace()->enqueueMessage(msg);
 
 
     char outmsg[256];

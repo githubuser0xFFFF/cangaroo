@@ -62,18 +62,44 @@ build:
 # --------------------------------------------------------
 release_job:
   stage: deploy
-  image: registry.gitlab.com/gitlab-org/cli:latest
+  image: curlimages/curl:latest
   rules:
     - if: $CI_COMMIT_TAG
-  dependencies:
-    - build
+  needs:
+    - job: build
+      artifacts: true
   script:
-    # glab auto-authenticates using CI_JOB_TOKEN with this image (no login needed)
-    - echo "Creating release for $CI_COMMIT_TAG"
-    - git fetch --tags
+    - echo "Creating release for: $CI_COMMIT_TAG"
 
-    # Safe create (won't fail if release already exists)
-    - glab release create "$CI_COMMIT_TAG" || true
+    # Try to create release (ignore if exists)
+    - |
+      curl --silent --show-error --fail \
+        --request POST \
+        --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+        --data "name=$CI_COMMIT_TAG" \
+        --data "tag_name=$CI_COMMIT_TAG" \
+        --data-urlencode "description=Automated release" \
+        "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases" \
+        || echo "Release already exists, continue..."
 
-    # Upload the artifact
-    - glab release upload "$CI_COMMIT_TAG" cangaroo_alt.zip
+    # Upload artifact
+    - |
+      curl --silent --show-error --fail \
+        --request POST \
+        --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+        --form "file=@cangaroo_alt.zip" \
+        "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/uploads" \
+        > upload.json
+
+    - UPLOAD_URL=$(cat upload.json | sed -n 's/.*"url":"\([^"]*\)".*/\1/p')
+    - echo "Uploaded file URL: $UPLOAD_URL"
+
+    # Add asset to release
+    - |
+      curl --silent --show-error --fail \
+        --request POST \
+        --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+        --data "name=cangaroo_alt.zip" \
+        --data "url=${CI_PROJECT_URL}${UPLOAD_URL}" \
+        "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases/$CI_COMMIT_TAG/assets/links"
+    

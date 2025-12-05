@@ -235,7 +235,7 @@ QDateTime CanMessage::getDateTime() const
 
     // Qt does not support microseconds in QDateTime directly,
     // but this keeps millisecond precision intact.
-    QDateTime dt = QDateTime::fromMSecsSinceEpoch(ms, Qt::UTC);
+    QDateTime dt = QDateTime::fromMSecsSinceEpoch(ms);
 
     // If you want: dt = dt.addMSecs(us_rem / 1000.0);
     // but that would change full precision due to rounding.

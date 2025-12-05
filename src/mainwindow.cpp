@@ -21,6 +21,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "version.h"
 
 #include <QtWidgets>
 #include <QMdiArea>
@@ -407,15 +408,14 @@ bool MainWindow::showSetupDialog()
 
 void MainWindow::showAboutDialog()
 {
-    QMessageBox::about(this,
-       "About cangaroo",
-       "cangaroo\n"
+    QMessageBox::about(this, "About cangaroo", QString (
        "open source can bus analyzer\n"
        "\n"
-       "version 0.2.3\n"
+       "version %1\n"
        "\n"
        "(c)2015-2017 Hubert Denkmair\n"
-       "(c)2018-2022 Ethan Zonca"
+       "(c)2018-2022 Ethan Zonca\n"
+       "(c)2025-2025 Uwe Kindler\n").arg(GIT_DESCRIBE)
     );
 }
 

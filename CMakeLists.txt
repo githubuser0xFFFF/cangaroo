@@ -1,5 +1,23 @@
 cmake_minimum_required(VERSION 3.16)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(GetGitRevisionDescription)
+
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+git_describe(GIT_DESCRIBE "--tags")
+
+if(NOT GIT_SHA1)
+    set(GIT_SHA1 "unknown")
+endif()
+
+message(STATUS "Commit: ${GIT_SHA1}")
+message(STATUS "Describe: ${GIT_DESCRIBE}")
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/src/version.h
+)
+
 project(cangaroo
     VERSION 1.0.0
     DESCRIPTION "Open source CAN bus analyzer"

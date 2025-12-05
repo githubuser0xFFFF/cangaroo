@@ -1,0 +1,41 @@
+// app.rc — Windows resource script
+
+#include <windows.h>
+
+// ---------------------------------------------------------
+// 1. ICON RESOURCE
+// ---------------------------------------------------------
+IDI_APP_ICON ICON "app.ico"
+
+// ---------------------------------------------------------
+// 2. VERSION INFORMATION
+// ---------------------------------------------------------
+1 VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEFLAGSMASK   0x3fL
+FILEFLAGS       0x0L
+FILEOS          0x00040004L
+FILETYPE        0x01L      // Application
+FILESUBTYPE     0x00L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"        // US English, Unicode
+        BEGIN
+            VALUE "CompanyName",      "Asclepion\0"
+            VALUE "FileDescription",  "cangaroo\0"
+            VALUE "FileVersion",      "1.0.0\0"
+            VALUE "InternalName",     "cangaroo.exe\0"
+            VALUE "LegalCopyright",   "© 2025 Asclepion\0"
+            VALUE "OriginalFilename", "cangaroo.exe\0"
+            VALUE "ProductName",      "cangaroo\0"
+            VALUE "ProductVersion",   "1.0.0\0"
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200   // English + Unicode
+    END
+END

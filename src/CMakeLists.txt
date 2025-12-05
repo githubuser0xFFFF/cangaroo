@@ -1,6 +1,8 @@
 # Main cangaroo application
 cmake_minimum_required(VERSION 3.16)
 
+set(WIN_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/app.rc)
+
 # Add subdirectories for all modules
 add_subdirectory(core)
 add_subdirectory(driver)
@@ -36,6 +38,7 @@ if(WIN32)
         ${CANGAROO_HEADERS} 
         ${CANGAROO_FORMS}
         ${CANGAROO_RESOURCES}
+        ${WIN_RESOURCES}
     )
 else()
     add_executable(cangaroo 

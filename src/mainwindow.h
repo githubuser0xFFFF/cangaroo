@@ -51,7 +51,8 @@ public:
     ~MainWindow();
 
 protected:
-    void closeEvent(QCloseEvent *event) Q_DECL_OVERRIDE;
+    void closeEvent(QCloseEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 
 public slots:
     QMainWindow *createTraceWindow(QString title=QString());
@@ -97,6 +98,9 @@ private:
     bool loadWorkspaceSetup(QDomElement el);
     void loadWorkspaceFromFile(QString filename);
     bool saveWorkspaceToFile(QString filename);
+    void saveLastWorkspacePath();
+    void restoreApplicationState();
+    void restoreLastWorkspace();
 
     void newWorkspace();
     void loadWorkspace();

@@ -25,6 +25,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QCoreApplication::setOrganizationName("Asclepion");
+    QCoreApplication::setApplicationName("cangaroo");
     MainWindow w;
 
     w.show();

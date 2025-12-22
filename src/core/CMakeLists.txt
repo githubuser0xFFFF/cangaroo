@@ -13,6 +13,7 @@ set(CORE_SOURCES
     LogModel.cpp
     ConfigurableWidget.cpp
     Log.cpp
+    Settings.cpp
 )
 
 set(CORE_HEADERS
@@ -30,6 +31,7 @@ set(CORE_HEADERS
     LogModel.h
     ConfigurableWidget.h
     Log.h
+    Settings.h
 )
 
 add_library(cangaroo_core STATIC ${CORE_SOURCES} ${CORE_HEADERS})

@@ -31,6 +31,7 @@
 
 #include <core/MeasurementSetup.h>
 #include <core/CanTrace.h>
+#include <core/Settings.h>
 #include <window/TraceWindow/TraceWindow.h>
 #include <window/SetupDialog/SetupDialog.h>
 #include <window/LogWindow/LogWindow.h>
@@ -109,6 +110,37 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         event->ignore();
     }
 }
+
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+    QMainWindow::showEvent(event);
+
+    static bool restored = false;
+    if (!restored) {
+        restored = true;
+        restoreApplicationState();
+    }
+}
+
+
+void MainWindow::restoreApplicationState()
+{
+    restoreLastWorkspace();
+}
+
+
+void MainWindow::restoreLastWorkspace()
+{
+    QString last = Settings::instance().value("workspace/lastPath").toString();
+    if (last.isEmpty())
+    {
+        return;
+    }
+
+    loadWorkspaceFromFile(last);
+}
+
 
 Backend &MainWindow::backend()
 {
@@ -210,6 +242,7 @@ void MainWindow::loadWorkspaceFromFile(QString filename)
     if (loadWorkspaceSetup(setupRoot)) {
         _workspaceFileName = filename;
         setWorkspaceModified(false);
+        saveLastWorkspacePath();
     } else {
         log_error(QString("Unable to read measurement setup from workspace config file: %1").arg(filename));
     }
@@ -254,6 +287,7 @@ bool MainWindow::saveWorkspaceToFile(QString filename)
         _workspaceFileName = filename;
         setWorkspaceModified(false);
         log_info(QString("Saved workspace settings to file: %1").arg(filename));
+        saveLastWorkspacePath();
         return true;
     } else {
         log_error(QString("Cannot open workspace file for writing: %1").arg(filename));
@@ -489,3 +523,9 @@ void MainWindow::on_action_WorkspaceNew_triggered()
     newWorkspace();
 }
 
+
+void MainWindow::saveLastWorkspacePath()
+{
+    auto& s = Settings::instance();
+    s.setValue("workspace/lastPath", _workspaceFileName);
+}

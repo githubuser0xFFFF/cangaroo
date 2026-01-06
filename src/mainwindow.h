@@ -109,5 +109,6 @@ private:
 
     void setWorkspaceModified(bool modified);
     int askSaveBecauseWorkspaceModified();
+    void setMainMenuIcons();
 
 };

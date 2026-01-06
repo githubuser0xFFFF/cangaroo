@@ -3,5 +3,22 @@
         <file>assets/mdibg.png</file>
         <file>assets/cangaroo.png</file>
         <file>assets/cangaroo.svg</file>
+        <file>assets/create_new_folder.svg</file>
+        <file>assets/delete.svg</file>
+        <file>assets/file_save.svg</file>
+        <file>assets/folder_check.svg</file>
+        <file>assets/folder_check_2.svg</file>
+        <file>assets/folder_open.svg</file>
+        <file>assets/handyman.svg</file>
+        <file>assets/mdibg.svg</file>
+        <file>assets/play_arrow.svg</file>
+        <file>assets/play_circle.svg</file>
+        <file>assets/stop.svg</file>
+        <file>assets/stop_circle.svg</file>
+        <file>assets/build.svg</file>
+        <file>assets/play_arrow_green.svg</file>
+        <file>assets/play_arrow_green_filled.svg</file>
+        <file>assets/stop_red.svg</file>
+        <file>assets/stop_red_filled.svg</file>
     </qresource>
 </RCC>

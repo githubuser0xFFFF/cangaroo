@@ -27,6 +27,7 @@
 #include "LinearTraceViewModel.h"
 #include "AggregatedTraceViewModel.h"
 #include "TraceFilterModel.h"
+#include <core/Backend.h>
 
 TraceWindow::TraceWindow(QWidget *parent, Backend &backend) :
     ConfigurableWidget(parent),
@@ -77,8 +78,18 @@ TraceWindow::TraceWindow(QWidget *parent, Backend &backend) :
     setTimestampMode(timestamp_mode_delta);
 
     connect(_linearTraceViewModel, SIGNAL(rowsInserted(QModelIndex,int,int)), this, SLOT(rowsInserted(QModelIndex,int,int)));
-
     connect(ui->filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(on_cbFilterChanged()));
+
+    connect(ui->startButton, &QAbstractButton::clicked, this, &TraceWindow::startMeasurement);
+    connect(ui->stopButton, &QAbstractButton::clicked, this, &TraceWindow::stopMeasurement);
+    ui->startButton->setIcon(QIcon(":/assets/play_arrow_green_filled.svg"));
+    ui->startButton->setToolTip("Start Measurement");
+    ui->startButton->setIconSize(QSize(24, 24));
+    ui->startButton->setAutoRaise(true);
+    ui->stopButton->setIcon(QIcon(":/assets/stop_red_filled.svg"));
+    ui->stopButton->setIconSize(QSize(24, 24));
+    ui->stopButton->setToolTip("Stop Measurement");
+    ui->stopButton->setAutoRaise(true);
 }
 
 TraceWindow::~TraceWindow()
@@ -214,4 +225,24 @@ void TraceWindow::on_cbFilterChanged()
     _linFilteredModel->setFilterText(ui->filterLineEdit->text());
     _aggFilteredModel->invalidate();
     _linFilteredModel->invalidate();
+}
+
+
+void TraceWindow::startMeasurement()
+{
+    if (_backend->isMeasurementRunning())
+    {
+        return;
+    }
+    _backend->clearTrace();
+    _backend->startMeasurement();
+}
+
+
+void TraceWindow::stopMeasurement()
+{
+    if (_backend->isMeasurementRunning())
+    {
+        _backend->stopMeasurement();
+    }
 }

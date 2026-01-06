@@ -87,7 +87,24 @@ MainWindow::MainWindow(QWidget *parent) :
     newWorkspace();
 
     _setupDlg = new SetupDialog(Backend::instance(), 0); // NOTE: must be called after drivers/plugins are initialized
+    setMainMenuIcons();
 
+}
+
+
+void MainWindow::setMainMenuIcons()
+{
+    ui->action_WorkspaceNew->setIcon(QIcon(":/assets/create_new_folder.svg"));
+    ui->action_WorkspaceOpen->setIcon(QIcon(":/assets/folder_open.svg"));
+    ui->action_WorkspaceSave->setIcon(QIcon(":/assets/folder_check_2.svg"));
+    ui->action_WorkspaceSaveAs->setIcon(QIcon(":/assets/folder_check.svg"));
+
+    ui->actionStart_Measurement->setIcon(QIcon(":/assets/play_arrow_green_filled.svg"));
+    ui->actionStop_Measurement->setIcon(QIcon(":/assets/stop_red_filled.svg"));
+    ui->actionSetup->setIcon(QIcon(":/assets/build.svg"));
+
+    ui->action_TraceClear->setIcon(QIcon(":/assets/delete.svg"));
+    ui->actionSave_Trace_to_file->setIcon(QIcon(":/assets/file_save.svg"));
 }
 
 MainWindow::~MainWindow()

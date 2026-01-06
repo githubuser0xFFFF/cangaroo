@@ -65,6 +65,8 @@ private slots:
 
     void on_cbTimestampMode_currentIndexChanged(int index);
     void on_cbFilterChanged(void);
+    void startMeasurement();
+    void stopMeasurement();
 
 private:
     Ui::TraceWindow *ui;

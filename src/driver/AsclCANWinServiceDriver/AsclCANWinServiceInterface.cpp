@@ -24,22 +24,27 @@
 #include <core/Backend.h>
 #include <core/MeasurementInterface.h>
 #include <core/CanMessage.h>
+#include <core/CanMessageOperators.h>
 
 #include <QString>
 #include <QStringList>
 #include <QHostAddress>
 #include <QThread>
-#include "CANServiceDef.h"
-
-static constexpr int FRAME_SIZE = sizeof(CANServiceCommon::CanMsgBytes);
+#include "SocketWorker.h"
 
 AsclCANWinServiceInterface::AsclCANWinServiceInterface(AsclCANWinServiceDriver *driver)
   : CanInterface((CanDriver *)driver)
+  , _workerThread(nullptr)
+  , _socketWorker(nullptr)
+  , _isConnected(false)
 {
+    memset(&_status, 0, sizeof(_status));
+    qDebug() << "Interface created in thread:" << QThread::currentThread();
 }
 
 AsclCANWinServiceInterface::~AsclCANWinServiceInterface()
 {
+    closeImpl();
 }
 
 QString AsclCANWinServiceInterface::getName() const
@@ -115,86 +120,135 @@ int AsclCANWinServiceInterface::getNumTxDropped()
 
 
 void AsclCANWinServiceInterface::open() {
-    if (isOpen())
-    {
+    if (isOpen()) {
         return;
     }
-    _socket = new QTcpSocket();
-    _socket->connectToHost(
-        QHostAddress(QString::fromStdString(CANServiceCommon::ServiceAddr)),
-        CANServiceCommon::ServicePort
-        );
-    _socket->waitForConnected(1000);
-    qDebug() << "socket state: " << _socket->state();
+    
+    // Create worker thread
+    _workerThread = new QThread(this);
+    _socketWorker = new SocketWorker();
+    _socketWorker->moveToThread(_workerThread);
+    
+    // Connect signals for thread communication
+    connect(_socketWorker, &SocketWorker::connected, this, &AsclCANWinServiceInterface::onSocketConnected);
+    connect(_socketWorker, &SocketWorker::disconnected, this, &AsclCANWinServiceInterface::onSocketDisconnected);
+    connect(_socketWorker, &SocketWorker::errorOccurred, this, &AsclCANWinServiceInterface::onSocketError);
+    connect(_socketWorker, &SocketWorker::messageReceived, this, &AsclCANWinServiceInterface::onMessageReceived);
+    connect(_socketWorker, &SocketWorker::messageSent, this, &AsclCANWinServiceInterface::onMessageSent);
+    
+    // Connect thread lifecycle
+    connect(_workerThread, &QThread::started, _socketWorker, &SocketWorker::connectToService);
+    connect(_workerThread, &QThread::finished, _socketWorker, &QObject::deleteLater);
+    
+    // Start worker thread
+    _workerThread->start();
+    
+    qDebug() << "Interface opened from thread:" << QThread::currentThread();
 }
 
 bool AsclCANWinServiceInterface::isOpen()
 {
-    return _socket && _socket->state() == QAbstractSocket::ConnectedState;
+    return _workerThread != nullptr;
 }
 
 void AsclCANWinServiceInterface::close() {
-    if (!isOpen())
-    {
-        return;
-    }
-
-    _socket->close();
-    delete _socket;
-    _socket = nullptr;
+    closeImpl();
 }
 
-void AsclCANWinServiceInterface::sendMessage(const CanMessage &msg) {
-    if (!isOpen())
-    {
+
+void AsclCANWinServiceInterface::closeImpl()
+{
+    if (!_workerThread) {
         return;
     }
 
-    CANServiceCommon::CANMessage tx_msg;
-    tx_msg.id = msg.getId();
-    tx_msg.size = msg.getLength();
-    for (int i = 0; i < tx_msg.size; ++i)
-    {
-        tx_msg.data[i] = msg.getByte(i);
+    // Signal worker to disconnect and stop receiving
+    QMetaObject::invokeMethod(_socketWorker, "disconnectFromService", Qt::QueuedConnection);
+
+    // Wait for thread to finish
+    if (_workerThread->isRunning()) {
+        _workerThread->quit();
+        _workerThread->wait(3000);
     }
-    CANServiceCommon::CanMsgBytes buffer;
-    CANServiceCommon::pack(tx_msg, buffer);
 
-    QByteArray Data(reinterpret_cast<const char*>(buffer.data()), buffer.size());
-    _socket->write(Data);
-    _status.tx_count++;
+    _workerThread->deleteLater();
+    _workerThread = nullptr;
+    _socketWorker = nullptr;
 
-    //_rxBuffer.append(Data);
+    _isConnected = false;
+
+    // Clear any pending messages
+    QMutexLocker locker(&_receivedMessagesMutex);
+    _receivedMessages.clear();
+}
+
+
+void AsclCANWinServiceInterface::sendMessage(const CanMessage &msg) {
+    if (!isOpen()) {
+        return;
+    }
+    
+    // Queue the message for sending in worker thread
+    QMetaObject::invokeMethod(_socketWorker, "sendMessage", Qt::QueuedConnection,
+                             Q_ARG(const CanMessage&, msg));
 }
 
 bool AsclCANWinServiceInterface::readMessage(QList<CanMessage> &msglist, unsigned int timeout_ms) {
-    if (!_socket->waitForReadyRead(timeout_ms))
-    {
-        return false;
-    }
-
-    _rxBuffer.append(_socket->readAll());
-    // Process full frames only
-    while (_rxBuffer.size() >= FRAME_SIZE)
-    {
-        QByteArray frame = _rxBuffer.left(FRAME_SIZE);
-        _rxBuffer.remove(0, FRAME_SIZE);
-
-        CANServiceCommon::CANMessage msg;
-        memcpy(&msg, frame.data(), sizeof(CANServiceCommon::CANMessage));
-
-        CanMessage rx_msg(msg.id);
-        rx_msg.setLength(msg.size);
-        rx_msg.setCurrentTimestamp();
-        rx_msg.setInterfaceId(getId());
-        for (int i = 0; i < msg.size; ++i)
-        {
-            rx_msg.setDataAt(i, msg.data[i]);
+    QMutexLocker locker(&_receivedMessagesMutex);
+    
+    // Wait for messages if none available
+    if (_receivedMessages.isEmpty()) {
+        if (!_messagesAvailable.wait(&_receivedMessagesMutex, timeout_ms)) {
+            return false; // Timeout
         }
-
-        msglist.append(rx_msg);
-        _status.rx_count++;
     }
+    
+    // Move all available messages to the output list
+    while (!_receivedMessages.isEmpty()) {
+        msglist.append(_receivedMessages.dequeue());
+    }
+    
+    return !msglist.isEmpty();
+}
 
-    return true;
+// Signal handlers for SocketWorker
+void AsclCANWinServiceInterface::onSocketConnected()
+{
+    _isConnected = true;
+    qDebug() << "Interface connected, starting receive";
+    
+    // Start receiving messages
+    QMetaObject::invokeMethod(_socketWorker, "startReceiving", Qt::QueuedConnection);
+}
+
+void AsclCANWinServiceInterface::onSocketDisconnected()
+{
+    _isConnected = false;
+    qDebug() << "Interface disconnected";
+}
+
+void AsclCANWinServiceInterface::onSocketError(const QString &errorString)
+{
+    qWarning() << "Socket error:" << errorString;
+    _isConnected = false;
+}
+
+void AsclCANWinServiceInterface::onMessageReceived(const CanMessage &msg)
+{
+    QMutexLocker locker(&_receivedMessagesMutex);
+    
+    // Set interface ID for the received message
+    CanMessage rxMsg = msg;
+    rxMsg.setInterfaceId(getId());
+    
+    _receivedMessages.enqueue(rxMsg);
+    _status.rx_count++;
+    
+    // Wake up any threads waiting for messages
+    _messagesAvailable.wakeAll();
+}
+
+void AsclCANWinServiceInterface::onMessageSent()
+{
+    _status.tx_count++;
 }

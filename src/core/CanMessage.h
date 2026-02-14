@@ -69,6 +69,7 @@ public:
 
     QString getIdString() const;
     QString getDataHexString() const;
+    QString toString() const;
 
 private:
     uint32_t _raw_id;

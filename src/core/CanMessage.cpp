@@ -265,6 +265,15 @@ QString CanMessage::getDataHexString() const
     return outstr;
 }
 
+QString CanMessage::toString() const
+{
+    QString result = QString("ID: %1  DLC: %2  Data: %3")
+                    .arg(getIdString())
+                    .arg(getLength())
+                    .arg(getDataHexString().trimmed());
+    return result;
+}
+
 
 bool CanMessage::isTx() const
 {

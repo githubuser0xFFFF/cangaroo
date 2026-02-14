@@ -1,7 +1,12 @@
 #pragma once
 
 #include "../CanInterface.h"
-#include <QTcpSocket>
+#include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
+#include <QQueue>
+#include <QTimer>
+#include "SocketWorker.h"
 
 class AsclCANWinServiceDriver;
 
@@ -52,8 +57,25 @@ public:
     virtual int getNumTxErrors();
     virtual int getNumTxDropped();
 
+private slots:
+    void onSocketConnected();
+    void onSocketDisconnected();
+    void onSocketError(const QString &errorString);
+    void onMessageReceived(const CanMessage &msg);
+    void onMessageSent();
+
 private:
+    void closeImpl();
     can_status_t _status;
-    QTcpSocket* _socket = nullptr;
-    QByteArray _rxBuffer;
+    
+    // Threading components
+    QThread *_workerThread;
+    SocketWorker *_socketWorker;
+    
+    // Thread-safe message queue for received messages
+    QQueue<CanMessage> _receivedMessages;
+    QMutex _receivedMessagesMutex;
+    QWaitCondition _messagesAvailable;
+    
+    bool _isConnected;
 };

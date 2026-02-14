@@ -2,11 +2,13 @@
 set(ASCLCAN_SOURCES
     AsclCANWinServiceInterface.cpp
     AsclCANWinServiceDriver.cpp
+    SocketWorker.cpp
 )
 
 set(ASCLCAN_HEADERS
     AsclCANWinServiceInterface.h
     AsclCANWinServiceDriver.h
+    SocketWorker.h
     CANServiceDef.h
 )
 

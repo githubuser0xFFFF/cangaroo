@@ -32,6 +32,7 @@ set(CORE_HEADERS
     ConfigurableWidget.h
     Log.h
     Settings.h
+    CanMessageOperators.h
 )
 
 add_library(cangaroo_core STATIC ${CORE_SOURCES} ${CORE_HEADERS})
